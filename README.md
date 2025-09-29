@@ -4,6 +4,7 @@ simple toy shell for learning more about low level programming
 * gcc
 * meson
 * ninja
+* gnu's readline (probably called libreadline on your package manager)
 
 # known issues:
 * lack of EVERYTHING
