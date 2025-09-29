@@ -1,3 +1,5 @@
 project('shell','c')
 
-executable('main','main.c')
+readlinedep = dependency('readline')
+
+executable('main','main.c', dependencies : readlinedep)
