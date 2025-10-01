@@ -19,12 +19,14 @@
 char buffer[MAX_CHARS];
 char prompt[128];
 
-const char* builtins[10] =
+enum
 {
-"pwd",
-"cd",
-"exit",  
-};
+  PWD = 0,
+  CD,
+  EXIT,
+}b_index;
+
+char* builtins[10];
 
 typedef struct
 {
@@ -75,7 +77,6 @@ int tokenize(char* buf, char *args[MAX_ARGS])
   for(int i = 0 ;token != NULL;i++)
   {
     args[i] = token;
-    printf("%s\n",args[i]);
     token = strtok(NULL, " ");
     argc++;
   }
@@ -98,9 +99,9 @@ int runCommand(char **args, int argc)
     command_counter++;
     if(execvp(args[0], args) < 0)
     {
-      printf("\ncould not execute command %s",args[0]);
+      printVerbose("\ncould not execute command",flags);
+      return -1;
     }
-    exit(0);
   }
   else
   {
@@ -117,7 +118,7 @@ __sighandler_t handlesigint()
   return 0;
 }
 
-char* isnbuiltin(char* cmd, char** builtins,size_t size)
+char* isnbuiltin(char* cmd, char* builtins[10],size_t size)
 {
   for(int i = 0; i < size; i++)
   {
@@ -129,26 +130,40 @@ char* isnbuiltin(char* cmd, char** builtins,size_t size)
   return NULL;
 }
 
-int handleBultin(char *cmd, char** builtins,char** args)
+int handleBultin(char *cmd, char *builtins[10],char** args)
 {
-  char* builtin = isnbuiltin(cmd, builtins, sizeof(builtins)/sizeof(builtins[0]));  
+  char* builtin = isnbuiltin(cmd, builtins, (sizeof(**builtins) + 1 /sizeof(builtins[0])));  
   if(!builtin || args[0] != cmd)
   {
-    return 0;
+    printf("\nInvalid shell usage!\n");
+    return -1;
   }
   else
   {
-    if(strcmp(builtin, args[0]))
+    if(!strcmp(builtin, args[0]))
     {
-      chdir(args[1]);
+      puts("\nthis is NOT supposed to happen\n");
+      return -1;
+    }
+    else if(strcmp(builtin, args[0]))
+    {
+      if(strcmp(builtin,"exit"))
+      {
+        printf("bye bye!!! :3\n");
+        exit(0);
+      }
       return 1;
     }
   }
-  return 0;
+  return -1;
 }
 
 int main(int ac, char** av)
 {
+
+  builtins[PWD] = "pwd";
+  builtins[EXIT] = "exit";
+  builtins[CD] = "cd";
   if(ac > 1)
   {
     for(int i = 0; i < ac; i++)
@@ -174,7 +189,21 @@ int main(int ac, char** av)
   {
     getInput(buffer);
     tokenize(buffer, args);
-    runCommand(args, argc);
+    if(runCommand(args, argc) < 0)
+    {
+      if(!handleBultin(args[0], builtins, args))
+      {
+        printf("unknwon command: %s",args[0]);
+      }
+      else
+      {
+        continue;
+      }
+    }
+    else
+    {
+      continue;
+    }
   }while(1);
   return EXIT_SUCCESS;
 }
