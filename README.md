@@ -7,5 +7,5 @@ simple toy shell for learning more about low level programming
 * gnu's readline (probably called libreadline on your package manager)
 
 # known issues:
-* lack of EVERYTHING
-* prompt is acting weird
+* no piping and redirection as for now
+* cannot handle signals
