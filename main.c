@@ -81,7 +81,7 @@ int tokenize(char* buf, char *args[MAX_ARGS])
     argc++;
   }
   args[argc] = NULL;
-  return 0;
+  return argc;
 }
 
 int runCommand(char **args, int argc)
@@ -135,19 +135,18 @@ int handleBultin(char *cmd, char *builtins[10],char** args)
   char* builtin = isnbuiltin(cmd, builtins, (sizeof(**builtins) + 1 /sizeof(builtins[0])));  
   if(!builtin || args[0] != cmd)
   {
-    printf("\nInvalid shell usage!\n");
     return -1;
   }
   else
   {
-    if(!strcmp(builtin, args[0]))
+    if(strcmp(builtin, args[0]) != 0)
     {
       puts("\nthis is NOT supposed to happen\n");
       return -1;
     }
     else if(strcmp(builtin, args[0]))
     {
-      if(strcmp(builtin,"exit"))
+      if(strcmp(builtin,"exit") == 0)
       {
         printf("bye bye!!! :3\n");
         exit(0);
@@ -188,22 +187,12 @@ int main(int ac, char** av)
   do
   {
     getInput(buffer);
-    tokenize(buffer, args);
-    if(runCommand(args, argc) < 0)
-    {
-      if(!handleBultin(args[0], builtins, args))
-      {
-        printf("unknwon command: %s",args[0]);
-      }
-      else
-      {
-        continue;
-      }
-    }
-    else
+    if(tokenize(buffer, args) == 0)
     {
       continue;
     }
+    runCommand(args, argc);
+    handleBultin(args[0], builtins, args);
   }while(1);
   return EXIT_SUCCESS;
 }
